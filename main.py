@@ -5,7 +5,7 @@ import requests
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import sambanova
+from groq import Groq
 
 app = FastAPI()
 
@@ -29,8 +29,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- Load LLM and Data ---
-llm_client = sambanova.SambaNova(api_key=os.environ.get("SAMBANOVA_API_KEY"))
+# --- Load Groq LLM ---
+# Make sure to set GROQ_API_KEY in Render environment variables!
+llm_client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
 # Read your info file into memory once when the server starts
 try:
@@ -65,10 +66,10 @@ async def chat_endpoint(request: ChatRequest):
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": request.message}
             ],
-            model="Meta-Llama-3.3-70B-Instruct", 
+            model="llama-3.3-70b-versatile", # Groq's Llama 3.3 model 
         )
         answer = completion.choices[0].message.content
         return {"reply": answer}
     except Exception as e:
-        print(f"SAMBANOVA ERROR: {str(e)}") # This puts the error in your Render logs
-        return {"reply": f"SYSTEM ERROR: {str(e)}"} # This prints the error in your Chat Window
+        print(f"GROQ ERROR: {str(e)}")
+        return {"reply": "Sorry, my systems are currently updating. Please reach out to Lucky directly!"}
