@@ -70,4 +70,5 @@ async def chat_endpoint(request: ChatRequest):
         answer = completion.choices[0].message.content
         return {"reply": answer}
     except Exception as e:
-        return {"reply": "Sorry, my systems are currently updating. Please reach out to Lucky directly!"}
+        print(f"SAMBANOVA ERROR: {str(e)}") # This puts the error in your Render logs
+        return {"reply": f"SYSTEM ERROR: {str(e)}"} # This prints the error in your Chat Window
