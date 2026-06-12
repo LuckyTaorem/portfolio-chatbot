@@ -14,6 +14,9 @@ Name: Taorem Lucky Singh (Lucky)
 Location: Moreh, Manipur, India (PIN: 795131)
 Email: luckytaorem5@gmail.com
 LinkedIn: linkedin.com/in/luckytaorem
+Facebook: https://www.facebook.com/luckytaorem5/
+Instagram: https://www.instagram.com/____taorem/
+Github: https://github.com/LuckyTaorem
 
 =========================================================
 EDUCATION & CREDENTIALS
@@ -50,11 +53,15 @@ KEY PROJECTS
 - Techaimag (Tech AI Magazine): Developed a custom plugin to manage user badges (secure login, visual display, embed codes). Integrated PayPal/Razorpay for premium subscriptions and built REST APIs to sync web content with their mobile app. Also optimized site speed, caching, and Technical SEO.
 - AI Business Magazine: Integrated PayPal and Razorpay APIs for automated subscription processing using scalable architecture.
 - Heisenberg Institute: Developed dynamic application forms with custom triggers to push submission events to Google Analytics and automatically sync data into Google Sheets.
-- Secure Passkey Vault: A web app featuring AES-256 encrypted file sharing.
-- Auto-Blog-Daily: An AI-driven automated content generation system built with Python and GitHub Actions.
-- Blog Assistant: A RAG-based chatbot built using FastAPI and Llama models.
-- LinkyDoo: An all-in-one SEO backlink hub.
-- India Weather Map: An interactive SVG map integrated with live weather APIs.
+- Secure Passkey Vault: A robust, secure file-sharing platform featuring fast passkey authentication, server-side AES-256 encryption to safely store all file types, an interactive drag-and-drop interface, and encrypted URL tokens for safe sharing.
+- LinkyDoo: An all-in-one SEO tool for creating and managing high-quality backlinks—covering social bookmarking, classifieds, business listings, article submissions, and profiles—all from a single dashboard.
+- Guest Post Submission Platform: A WordPress-powered platform that lets users easily publish guest blogs, boosting engagement through guided posting and built-in SEO tools.
+- Auto Filler & Bulk URL Opener Extension: A productivity extension for Chrome and Edge that automates form inputs, opens multiple links at once, checks indexing status, and extracts all active URLs—streamlining workflows for SEOs, marketers, and multitaskers.
+- Interactive India Weather & Population Map: An interactive SVG-based application that visualizes real-time weather and population insights. Users can click any state to view current conditions and multi-day forecasts—powered by dynamic data and responsive front-end tech.
+- Interactive JSON-Based Story Teller: An interactive web platform that presents dynamic narratives using structured JSON story data and responsive user-driven flow with Voice Narration—crafted with HTML, CSS, and JavaScript.
+- Blood Donation: A blood donor finder web application with map search, chatting, RSS, Blog, Admin Panel, Blood Camps, Chatbot, and a Career page.
+- E-Program: An eLearning Website with sign up, login, profile editing, email verification, online compiler (API), quizzes, video courses, and an admin page.
+- Socialky: A custom social media site created on WordPress allowing users to post, send friend requests, follow people, create groups, and join forums.
 
 =========================================================
 PERSONAL DETAILS & FUN FACTS
