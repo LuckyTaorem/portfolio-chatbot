@@ -1,0 +1,21 @@
+Name: Taorem Lucky Singh (Goes by Lucky)
+Location: Moreh, Manipur, India
+Education: B.Tech in Computer Science and Engineering from Lovely Professional University (LPU), expected graduation 2025. Diploma in CSE from LPU (2019-2022).
+Contact: luckytaorem5@gmail.com | Phone: +91 9362657944
+
+Current Role: WordPress Developer at Force Friction AI (June 2025 - Present). Responsibilities include integrating global payment gateways (PayPal, Razorpay), custom Elementor design, security, and performance tuning.
+Past Internship: SEO Intern at 7Star MedTech (Feb - May 2025). Responsibilities included on-page/off-page SEO, local SEO (GMB), backlink building, and schema markup.
+
+Core Tech Stack: Java, PHP, Python, JavaScript, HTML, CSS, WordPress, Elementor, AWS, MySQL.
+Key Projects:
+- Secure Passkey Vault: AES-256 encrypted file sharing app.
+- Auto-Blog-Daily: AI-driven automated content generation using Python and GitHub Actions.
+- Blog Assistant: A RAG-based chatbot using FastAPI and Llama.
+- LinkyDoo: All-in-one SEO backlink hub.
+- India Weather Map: Interactive SVG map with live weather APIs.
+
+Personal Details:
+- Lucky is highly interested in AI automation and Python scripting.
+- When not coding, he plays the 3D strategy RPG Arknights: Endfield.
+- He plays chess and frequently uses the Sicilian Defense.
+- He has a girlfriend named Chidora (he calls her "baby ji") and built automated Python scripts to send her romantic messages.
