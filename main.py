@@ -29,9 +29,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- Load Groq LLM ---
-# Make sure to set GROQ_API_KEY in Render environment variables!
-llm_client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+# Initialize Groq (Fallback safely if key isn't set yet)
+groq_key = os.environ.get("GROQ_API_KEY", "missing_key")
+llm_client = Groq(api_key=groq_key)
 
 # Read your info file into memory once when the server starts
 try:
@@ -60,16 +60,147 @@ async def chat_endpoint(request: ChatRequest):
     {portfolio_info}
     """
     
-    try:
-        completion = llm_client.chat.completions.create(
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": request.message}
-            ],
-            model="llama-3.3-70b-versatile", # Groq's Llama 3.3 model 
-        )
-        answer = completion.choices[0].message.content
+    # --- ROBUST MULTI-PROVIDER WATERFALL CONFIGURATION ---
+    model_settings = [
+        {"provider": "groq", "model": "llama-3.3-70b-versatile"},
+        {"provider": "groq", "model": "llama-3.1-8b-instant"},
+        {"provider": "cerebras", "model": "llama-3.3-70b"},
+        {"provider": "mistral", "model": "mistral-large-latest"},
+        {"provider": "openrouter", "model": "meta-llama/llama-3.3-70b-instruct:free"},
+        {"provider": "cohere", "model": "command-r-plus"},
+        {"provider": "deepseek", "model": "deepseek-chat"}
+    ]
+
+    answer = None
+
+    for setting in model_settings:
+        provider = setting['provider']
+        model_name = setting['model']
+        
+        try:
+            # 1. GROQ
+            if provider == "groq":
+                if groq_key == "missing_key": continue
+                completion = llm_client.chat.completions.create(
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": request.message}
+                    ],
+                    model=model_name,
+                    temperature=0.7,
+                    max_tokens=300, 
+                )
+                answer = completion.choices[0].message.content.strip()
+
+            # 3. CEREBRAS
+            elif provider == "cerebras":
+                key = os.environ.get("CEREBRAS_API_KEY")
+                if not key: continue
+                res = requests.post(
+                    "https://api.cerebras.ai/v1/chat/completions",
+                    headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+                    json={
+                        "model": model_name,
+                        "messages": [
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": request.message}
+                        ],
+                        "temperature": 0.7, "max_tokens": 300
+                    },
+                    timeout=10
+                )
+                if res.status_code == 200: answer = res.json()['choices'][0]['message']['content'].strip()
+
+            # 4. MISTRAL AI
+            elif provider == "mistral":
+                key = os.environ.get("MISTRAL_API_KEY")
+                if not key: continue
+                res = requests.post(
+                    "https://api.mistral.ai/v1/chat/completions",
+                    headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+                    json={
+                        "model": model_name,
+                        "messages": [
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": request.message}
+                        ],
+                        "temperature": 0.7, "max_tokens": 300
+                    },
+                    timeout=10
+                )
+                if res.status_code == 200: answer = res.json()['choices'][0]['message']['content'].strip()
+
+            # 5. OPENROUTER
+            elif provider == "openrouter":
+                key = os.environ.get("OPENROUTER_API_KEY")
+                if not key: continue
+                res = requests.post(
+                    "https://openrouter.ai/api/v1/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {key}",
+                        "Content-Type": "application/json",
+                        "HTTP-Referer": "https://luckytaorem.github.io", 
+                        "X-Title": "LT Developer Portfolio Chat"
+                    },
+                    json={
+                        "model": model_name,
+                        "messages": [
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": request.message}
+                        ],
+                        "temperature": 0.7, "max_tokens": 300
+                    },
+                    timeout=10
+                )
+                if res.status_code == 200: answer = res.json()['choices'][0]['message']['content'].strip()
+
+            # 6. COHERE
+            elif provider == "cohere":
+                key = os.environ.get("COHERE_API_KEY")
+                if not key: continue
+                res = requests.post(
+                    "https://api.cohere.com/v1/chat",
+                    headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+                    json={
+                        "model": model_name,
+                        "message": request.message,
+                        "preamble": system_prompt,
+                        "max_tokens": 300
+                    },
+                    timeout=10
+                )
+                if res.status_code == 200: answer = res.json().get('text', '').strip()
+
+            # 7. DEEPSEEK
+            elif provider == "deepseek":
+                key = os.environ.get("DEEPSEEK_API_KEY")
+                if not key: continue
+                res = requests.post(
+                    "https://api.deepseek.com/v1/chat/completions",
+                    headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+                    json={
+                        "model": model_name,
+                        "messages": [
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": request.message}
+                        ],
+                        "temperature": 0.7, "max_tokens": 300
+                    },
+                    timeout=10
+                )
+                if res.status_code == 200: answer = res.json()['choices'][0]['message']['content'].strip()
+
+            # If we successfully got an answer, break out of the loop
+            if answer:
+                break
+
+        except Exception as e:
+            # Silently catch timeouts or API errors and move to the next provider
+            print(f"Provider Error ({provider}): {str(e)}")
+            continue
+
+    # Return the successful answer, or a graceful failure message if the entire waterfall collapses
+    if answer:
         return {"reply": answer}
-    except Exception as e:
-        print(f"GROQ ERROR: {str(e)}")
-        return {"reply": "Sorry, my systems are currently updating. Please reach out to Lucky directly!"}
+    else:
+        return {"reply": "Sorry, my AI systems are currently updating. Please reach out to Lucky directly via the contact form!"}
