@@ -1,6 +1,4 @@
 import os
-import time
-import threading
 import requests
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,17 +6,6 @@ from pydantic import BaseModel
 from groq import Groq
 
 app = FastAPI()
-
-# --- Render Self-Ping Mechanism to prevent sleeping ---
-def keep_awake():
-    url = os.environ.get("RENDER_EXTERNAL_URL", "http://localhost:10000")
-    while True:
-        time.sleep(600)  # Ping every 10 minutes
-        try:
-            requests.get(url)
-        except Exception:
-            pass
-threading.Thread(target=keep_awake, daemon=True).start()
 
 # --- Security: Only allow your portfolio to use this API ---
 app.add_middleware(
@@ -45,7 +32,7 @@ class ChatRequest(BaseModel):
 
 @app.get("/")
 async def keep_alive():
-    return {"status": "awake"}
+    return {"status": "Vercel Serverless Function is Awake!"}
 
 @app.post("/chat")
 async def chat_endpoint(request: ChatRequest):
@@ -190,16 +177,13 @@ async def chat_endpoint(request: ChatRequest):
                 )
                 if res.status_code == 200: answer = res.json()['choices'][0]['message']['content'].strip()
 
-            # If we successfully got an answer, break out of the loop
             if answer:
                 break
 
         except Exception as e:
-            # Silently catch timeouts or API errors and move to the next provider
             print(f"Provider Error ({provider}): {str(e)}")
             continue
 
-    # Return the successful answer, or a graceful failure message if the entire waterfall collapses
     if answer:
         return {"reply": answer}
     else:
