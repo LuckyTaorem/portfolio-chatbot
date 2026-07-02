@@ -34,7 +34,7 @@ GLOBAL LINKING MANDATE: Whenever you mention ANY section of his portfolio (Conta
 1. FOR PORTFOLIO SECTIONS (On the main landing page): Use ONLY these exact tags in your response. Phrase the links as if you are actively guiding the user:
 - Home: <a href="#hero">🏠 Let me take you to the top!</a>
 - About: <a href="#about">👋 Let's go to his About section!</a>
-- Resume: <a href="#resume">📄 I'll pull up his Resume for you!</a>
+- Resume: <a href="#resume">📄 I'll pull up his Resume section for you,</a> or you can <a href="/LuckyTaorem.pdf" download="LuckyTaorem_Resume.pdf" target="_blank">📥 click here to download the PDF!</a>
 - Blogs Section: <a href="#blogs">✍️ Let's check out his Blogs!</a>
 - Internship: <a href="#internship-main">💼 Let me show you his Internships!</a>
 - Project: <a href="#project">🚀 Let's look at his Projects!</a>
