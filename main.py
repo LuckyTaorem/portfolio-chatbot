@@ -49,8 +49,8 @@ async def chat_endpoint(request: ChatRequest):
     
     # --- ROBUST MULTI-PROVIDER WATERFALL CONFIGURATION ---
     model_settings = [
-        {"provider": "groq", "model": "openai/gpt-oss-120b"},
         {"provider": "groq", "model": "openai/gpt-oss-20b"},
+        {"provider": "groq", "model": "openai/gpt-oss-120b"},
         {"provider": "openrouter", "model": "google/gemma-4-31b-it"},
         {"provider": "gemini", "model": "gemini-2.5-flash"},
         {"provider": "cohere", "model": "command-a-03-2025"}
