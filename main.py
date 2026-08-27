@@ -49,13 +49,11 @@ async def chat_endpoint(request: ChatRequest):
     
     # --- ROBUST MULTI-PROVIDER WATERFALL CONFIGURATION ---
     model_settings = [
-        {"provider": "groq", "model": "llama-3.3-70b-versatile"},
-        {"provider": "groq", "model": "llama-3.1-8b-instant"},
-        {"provider": "cerebras", "model": "llama-3.3-70b"},
-        {"provider": "mistral", "model": "mistral-large-latest"},
-        {"provider": "openrouter", "model": "meta-llama/llama-3.3-70b-instruct:free"},
-        {"provider": "cohere", "model": "command-r-plus"},
-        {"provider": "deepseek", "model": "deepseek-chat"}
+        {"provider": "groq", "model": "openai/gpt-oss-120b"},
+        {"provider": "groq", "model": "openai/gpt-oss-20b"},
+        {"provider": "openrouter", "model": "google/gemma-4-31b-it"},
+        {"provider": "gemini", "model": "gemini-2.5-flash"},
+        {"provider": "cohere", "model": "command-a-03-2025"}
     ]
 
     answer = None
@@ -78,44 +76,6 @@ async def chat_endpoint(request: ChatRequest):
                     max_tokens=300, 
                 )
                 answer = completion.choices[0].message.content.strip()
-
-            # 3. CEREBRAS
-            elif provider == "cerebras":
-                key = os.environ.get("CEREBRAS_API_KEY")
-                if not key: continue
-                res = requests.post(
-                    "https://api.cerebras.ai/v1/chat/completions",
-                    headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
-                    json={
-                        "model": model_name,
-                        "messages": [
-                            {"role": "system", "content": system_prompt},
-                            {"role": "user", "content": request.message}
-                        ],
-                        "temperature": 0.7, "max_tokens": 300
-                    },
-                    timeout=10
-                )
-                if res.status_code == 200: answer = res.json()['choices'][0]['message']['content'].strip()
-
-            # 4. MISTRAL AI
-            elif provider == "mistral":
-                key = os.environ.get("MISTRAL_API_KEY")
-                if not key: continue
-                res = requests.post(
-                    "https://api.mistral.ai/v1/chat/completions",
-                    headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
-                    json={
-                        "model": model_name,
-                        "messages": [
-                            {"role": "system", "content": system_prompt},
-                            {"role": "user", "content": request.message}
-                        ],
-                        "temperature": 0.7, "max_tokens": 300
-                    },
-                    timeout=10
-                )
-                if res.status_code == 200: answer = res.json()['choices'][0]['message']['content'].strip()
 
             # 5. OPENROUTER
             elif provider == "openrouter":
@@ -141,6 +101,34 @@ async def chat_endpoint(request: ChatRequest):
                 )
                 if res.status_code == 200: answer = res.json()['choices'][0]['message']['content'].strip()
 
+            elif provider == "gemini":
+                key = os.environ.get("GEMINI_API_KEY")
+                if not key:
+                    continue
+                res = requests.post(
+                    f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={key}",
+                    headers={"Content-Type": "application/json"},
+                    json={
+                        "contents": [
+                            {"role": "system", "parts": [{"text": system_prompt}]},
+                            {"role": "user", "parts": [{"text": request.message}]}
+                        ],
+                        "generationConfig": {
+                            "maxOutputTokens": 300,
+                            "temperature": 0.7
+                        }
+                    },
+                    timeout=30
+                )
+                if res.status_code == 200:
+                    data = res.json()
+                    # Gemini responses are nested: candidates -> content -> parts -> text
+                    candidates = data.get("candidates", [])
+                    if candidates:
+                        parts = candidates[0].get("content", {}).get("parts", [])
+                        if parts and "text" in parts[0]:
+                            answer = parts[0]["text"].strip()
+
             # 6. COHERE
             elif provider == "cohere":
                 key = os.environ.get("COHERE_API_KEY")
@@ -157,25 +145,6 @@ async def chat_endpoint(request: ChatRequest):
                     timeout=10
                 )
                 if res.status_code == 200: answer = res.json().get('text', '').strip()
-
-            # 7. DEEPSEEK
-            elif provider == "deepseek":
-                key = os.environ.get("DEEPSEEK_API_KEY")
-                if not key: continue
-                res = requests.post(
-                    "https://api.deepseek.com/v1/chat/completions",
-                    headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
-                    json={
-                        "model": model_name,
-                        "messages": [
-                            {"role": "system", "content": system_prompt},
-                            {"role": "user", "content": request.message}
-                        ],
-                        "temperature": 0.7, "max_tokens": 300
-                    },
-                    timeout=10
-                )
-                if res.status_code == 200: answer = res.json()['choices'][0]['message']['content'].strip()
 
             if answer:
                 break
